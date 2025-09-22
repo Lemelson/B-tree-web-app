@@ -6,8 +6,8 @@
     <svg
       ref="svg"
       class="svg m-auto"
-      :width="(treeWidth + 5 * settings.keyCellWidth).toString() + 'px'"
-      :height="(treeHeight+ margin.top).toString() + 'px'"
+      :width="`${treeWidth + 5 * settings.keyCellWidth}px`"
+      :height="`${treeHeight + margin.top}px`"
     >
       <transition-group
         tag="g"
@@ -29,11 +29,11 @@
           v-for="node in nodes"
           :key="node.id"
           class="node"
+          :style="node.style"
         >
           <g
             v-for="key in node.keys"
             :key="key.text"
-            :style="node.style"
           >
             <rect
               :width="key.svgParams.width"
@@ -41,18 +41,20 @@
               :x="key.svgParams.x"
               :y="key.svgParams.y"
               :style="key.svgParams.style"
-            /> <rect />
+              :rx="settings.cornerRadius"
+              :ry="settings.cornerRadius"
+            />
             <text
-              :dx="key.position * settings.keyCellWidth -
-                (settings.keyCellWidth/2) * (node.keys.length) + 10 - (key.digits - 2)*4"
-              :dy="4"
+              :x="key.textPosition.x"
+              :y="key.textPosition.y"
+              dominant-baseline="middle"
+              text-anchor="middle"
               :style="node.textStyle"
             >
               {{ key.text }}
             </text>
           </g>
         </g>
-
       </transition-group>
     </svg>
   </div>
@@ -80,29 +82,29 @@ export default {
     return {
       svgWidth: undefined,
       settings: {
-        overflowX: 'hidden',
-        strokeColor: '#29B5FF',
-        width: '100',
-        keyCellWidth: 38,
-        keyCellHeight: 28,
+        keyCellWidth: 44,
+        keyCellHeight: 32,
+        cornerRadius: 8,
         linkStyles: {
           plain: {
-            stroke: 'black',
+            stroke: '#cbd5f5',
+            strokeWidth: 2,
           },
           highlighted: {
-            stroke: 'red',
+            stroke: '#2563eb',
+            strokeWidth: 3,
           },
         },
         rectStyles: {
           plain: {
-            fill: 'white',
-            stroke: 'black',
+            fill: '#f0f4ff',
+            stroke: '#2563eb',
             strokeWidth: 2,
           },
           highlighted: {
-            fill: 'lightblue',
-            stroke: 'red',
-            strokeWidth: 2,
+            fill: '#c7d2fe',
+            stroke: '#1d4ed8',
+            strokeWidth: 3,
           },
         },
       },
@@ -123,21 +125,20 @@ export default {
     },
     nodes() {
       if (this.root) {
-        const nodes = this.getNodes(this.root.descendants());
-        return nodes;
+        return this.getNodes(this.root.descendants());
       }
-      return undefined;
+      return [];
     },
     links() {
       if (this.root) {
-        const links = this.getLinks(this.root.descendants());
-        return links;
+        return this.getLinks(this.root.descendants());
       }
-      return undefined;
+      return [];
     },
     tree() {
       return d3.tree().nodeSize([this.settings.keyCellWidth, -this.settings.keyCellHeight * 2])
-        .separation((a, b) => (((a.data.leaves.keys.length + b.data.leaves.keys.length)) / 2 + (a.parent === b.parent ? 0.5 : 1)));
+        .separation((a, b) => (((a.data.leaves.keys.length + b.data.leaves.keys.length) / 2)
+          + (a.parent === b.parent ? 0.5 : 1)));
     },
     leftmostLeaf() {
       const leaves = this.root ? this.root.leaves() : undefined;
@@ -148,7 +149,9 @@ export default {
       return leaves ? leaves[leaves.length - 1] : undefined;
     },
     treeWidth() {
-      return (this.rightmostLeaf && this.leftmostLeaf) ? this.rightmostLeaf.x - this.leftmostLeaf.x : 380;
+      return (this.rightmostLeaf && this.leftmostLeaf)
+        ? this.rightmostLeaf.x - this.leftmostLeaf.x
+        : 380;
     },
     treeHeight() {
       return this.root ? (this.leftmostLeaf.depth + 1) * 2 * this.settings.keyCellHeight : 0;
@@ -158,8 +161,7 @@ export default {
         top: 20,
         right: 0,
         bottom: 0,
-        left: this.root ? this.root.x - this.leftmostLeaf.x
-        + 2.5 * this.settings.keyCellWidth : 0,
+        left: this.root ? this.root.x - this.leftmostLeaf.x + 2.5 * this.settings.keyCellWidth : 0,
       };
     },
   },
@@ -174,25 +176,34 @@ export default {
 
   methods: {
     getSVGParams(key, position, keys) {
+      const baseWidth = this.settings.keyCellWidth
+        + Math.max(key.value.toString().length - 1, 0) * 4;
+      const baseX = position * baseWidth - (baseWidth / 2) * keys.length;
+      const baseY = -this.settings.keyCellHeight / 2;
       return {
-        width: this.settings.keyCellWidth + (key.value.toString().length - 1) * 3,
+        width: baseWidth,
         height: this.settings.keyCellHeight,
-        x: position * (this.settings.keyCellWidth + (key.value.toString().length - 1) * 3)
-                - ((this.settings.keyCellWidth + (key.value.toString().length - 1) * 3) / 2) * (keys.length),
-        y: -this.settings.keyCellHeight / 2,
-        style: key.highlighted ? this.settings.rectStyles.highlighted : this.settings.rectStyles.plain,
+        x: baseX,
+        y: baseY,
+        style: key.highlighted
+          ? this.settings.rectStyles.highlighted
+          : this.settings.rectStyles.plain,
       };
     },
     getKeys(keys) {
-      return keys.map((key, ii, keyArray) => (
-        {
+      return keys.map((key, index, array) => {
+        const svgParams = this.getSVGParams(key, index, array);
+        const textX = svgParams.x + svgParams.width / 2;
+        const textY = svgParams.y + svgParams.height / 2;
+        return {
           text: key.value.toString(),
-          position: ii,
-          highlighted: key.highlighted,
-          digits: key.value.toString().length,
-          svgParams: this.getSVGParams(key, ii, keyArray),
-        }
-      )) || null;
+          svgParams,
+          textPosition: {
+            x: textX,
+            y: textY,
+          },
+        };
+      }) || [];
     },
     getNodes(descendants) {
       return descendants.map((d, i) => {
@@ -203,6 +214,11 @@ export default {
           keys: this.getKeys(d.data.leaves.keys),
           style: {
             transform: `translate(${x},${y})`,
+          },
+          textStyle: {
+            fill: '#0f172a',
+            fontSize: '14px',
+            fontWeight: 600,
           },
         };
       });
@@ -222,15 +238,19 @@ export default {
 
         if (this.treeType === 'b-tree') {
           const position = this.getLinkPosition(d.data.leaves.keys[0].value, d.parent);
-          parentx += ((position * this.settings.keyCellWidth) - (d.parent.data.leaves.keys.length * (this.settings.keyCellWidth / 2)));
+          parentx += (position * this.settings.keyCellWidth)
+            - (d.parent.data.leaves.keys.length * (this.settings.keyCellWidth / 2));
           parenty += this.settings.keyCellHeight / 2;
         }
         const y = this.margin.top - d.y;
-        const highlighted = d.data.leaves.keys.some((key) => key.highlighted) && d.parent.data.leaves.keys.some((key) => key.highlighted);
+        const highlighted = d.data.leaves.keys.some((key) => key.highlighted)
+          && d.parent.data.leaves.keys.some((key) => key.highlighted);
         return {
           id: i,
           d: `M${x},${y}L${parentx},${parenty}`,
-          style: highlighted ? this.settings.linkStyles.highlighted : this.settings.linkStyles.plain,
+          style: highlighted
+            ? this.settings.linkStyles.highlighted
+            : this.settings.linkStyles.plain,
         };
       });
     },
@@ -249,9 +269,33 @@ export default {
 };
 </script>
 
-<style>
-  .view-container {
-    height: 600px;
-    align-items: center;
-  }
+<style scoped>
+.view-container {
+  height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg {
+  transition: all 0.3s ease;
+}
+
+.link {
+  fill: none;
+}
+
+.line-enter-active,
+.line-leave-active,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.line-enter,
+.line-leave-to,
+.list-enter,
+.list-leave-to {
+  opacity: 0;
+}
 </style>

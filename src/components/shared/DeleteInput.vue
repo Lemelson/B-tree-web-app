@@ -2,20 +2,27 @@
   <div class="button-container align-center flex">
     <v-text-field
       v-if="!onlypop"
-      color="error"
+      v-model="deletedValue"
       class="text-field"
-      placeholder="Удалить число"
-      :value="deletedValue"
-      @input="deletedValue = $event"
+      color="error"
+      :label="label"
+      :hint="hint"
+      :persistent-hint="Boolean(hint)"
+      :disabled="disabled"
+      outlined
+      dense
+      clearable
+      hide-details="auto"
+      prepend-inner-icon="mdi-delete-outline"
       @keyup.enter="deleteValue"
     />
     <v-btn
       color="error"
-      class="button"
+      class="button ml-3"
       :disabled="disabled"
       @click="deleteValue"
     >
-      удалить
+      Удалить
     </v-btn>
   </div>
 </template>
@@ -24,8 +31,10 @@
 export default {
   name: 'DeleteInput',
   props: {
-    onlypop: { type: Boolean },
-    disabled: { type: Boolean },
+    onlypop: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
+    label: { type: String, default: 'Удаление значения' },
+    hint: { type: String, default: '' },
   },
   data() {
     return {
@@ -34,22 +43,26 @@ export default {
   },
   methods: {
     deleteValue() {
-      this.$emit('myEvent', this.deletedValue);
-      this.deletedValue = '';
+      if (this.deletedValue !== '' || this.onlypop) {
+        this.$emit('myEvent', this.deletedValue);
+        this.deletedValue = '';
+      }
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .button-container {
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
 }
+
 .text-field {
-  margin-right: 1rem;
+  flex: 1 1 auto;
 }
+
 .button {
-  min-width: fit-content !important;
+  min-width: 120px;
 }
 </style>

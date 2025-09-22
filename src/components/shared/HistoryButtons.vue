@@ -1,22 +1,26 @@
 <template>
-  <div class="step-interface-container">
-    <div class="flex button-container">
+  <div class="step-interface-container text-center">
+    <div class="button-container d-flex align-center justify-center">
       <v-btn
-        class="button yellow lighten-4"
+        class="button"
+        icon
+        color="primary"
         :disabled="disabled.backButtonIsDisabled || disabled.isAnimating"
         @click="stepBack"
       >
-        <strong>&lt;</strong>
+        <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
       <v-btn
-        class="button yellow lighten-4"
+        class="button"
+        icon
+        color="primary"
         :disabled="disabled.forwardButtonIsDisabled || disabled.isAnimating"
         @click="stepForward"
       >
-        <strong>&gt;</strong>
+        <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
     </div>
-    <span class="text-sm">{{ label }}</span>
+    <span class="caption text-uppercase grey--text text--darken-1">{{ label }}</span>
   </div>
 </template>
 
@@ -26,7 +30,7 @@ export default {
   props: {
     length: { type: Number, default: 1 },
     currentFrame: { type: Number, default: 0 },
-    disabled: { type: Object, default: undefined },
+    disabled: { type: Object, default: () => ({}) },
     label: { type: String, default: '' },
   },
   methods: {
@@ -42,12 +46,10 @@ export default {
 
 <style scoped>
 .button-container {
-  width: 100%;
-  max-width: 200px;
+  gap: 12px;
 }
+
 .button {
-  min-width: fit-content !important;
-  font-size: 1.5rem !important;
-  background-color: beige;
+  background: #f3f6ff !important;
 }
 </style>

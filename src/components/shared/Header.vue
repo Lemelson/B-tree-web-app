@@ -1,30 +1,34 @@
-<template fluid>
-  <v-card
-    color="#edf2f7"
+<template>
+  <v-app-bar
     flat
-    tile
-    height="80px"
-  />
+    color="transparent"
+    class="app-toolbar px-6"
+  >
+    <v-toolbar-title class="font-weight-semibold text-h5">
+      B-Tree Studio
+    </v-toolbar-title>
+    <v-spacer />
+    <v-chip
+      color="primary"
+      text-color="white"
+      label
+      small
+      outlined
+    >
+      учебный проект
+    </v-chip>
+  </v-app-bar>
 </template>
 
 <script>
-
-import Router from 'vue-router';
-
-const router = new Router();
-
 export default {
   name: 'Header',
-  methods: {
-    goBack() {
-      router.go(-1);
-    },
-  },
 };
 </script>
 
 <style scoped>
-.header-logo {
-  max-width: 120px;
+.app-toolbar {
+  background: transparent;
+  backdrop-filter: blur(12px);
 }
 </style>

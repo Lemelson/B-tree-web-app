@@ -1,36 +1,45 @@
 <template>
-  <div class="flex button-container align-center">
+  <div class="button-container align-center flex">
     <v-text-field
+      v-model="insertedValue"
       class="text-field"
-      placeholder="Вставьте число"
-      :value="insertedValue"
-      @input="insertedValue = $event"
+      :label="label"
+      :hint="hint"
+      :persistent-hint="Boolean(hint)"
+      :disabled="disabled"
+      outlined
+      dense
+      clearable
+      hide-details="auto"
+      prepend-inner-icon="mdi-plus-circle-outline"
       @keyup.enter="insertValue"
     >
-      <v-tooltip
-        slot="append"
-        max-width="300"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-icon
-            class="h-8"
-            color="primary"
-            dark
-            v-on="on"
-          >
-            mdi-help-circle
-          </v-icon>
-        </template>
-        <span>Чтобы вставить несколько чисел последовательно,
-          введите их через запятую. Пример: 10,20,30</span>
-      </v-tooltip>
+      <template #append>
+        <v-tooltip
+          bottom
+          max-width="300"
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              v-bind="attrs"
+              color="primary"
+              small
+              v-on="on"
+            >
+              mdi-help-circle
+            </v-icon>
+          </template>
+          <span>
+            Чтобы вставить несколько чисел, введите их через запятую,
+            пробел или точку с запятой.
+          </span>
+        </v-tooltip>
+      </template>
     </v-text-field>
     <v-btn
-      class="button"
+      class="button ml-3"
       color="primary"
       :disabled="disabled"
-      dark
       @click="insertValue"
     >
       Вставить
@@ -42,7 +51,9 @@
 export default {
   name: 'InsertInput',
   props: {
-    disabled: { type: Boolean },
+    disabled: { type: Boolean, default: false },
+    label: { type: String, default: 'Вставка значения' },
+    hint: { type: String, default: '' },
   },
   data() {
     return {
@@ -60,15 +71,17 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .button-container {
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
 }
-.text-field{
-  margin-right: 1rem;
+
+.text-field {
+  flex: 1 1 auto;
 }
+
 .button {
-  min-width: fit-content !important;
+  min-width: 120px;
 }
 </style>

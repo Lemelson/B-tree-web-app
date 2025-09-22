@@ -1,15 +1,9 @@
 <template>
-  <v-app>
-    <Header
-      elevation="1"
-      class="full-width app-header flex"
-    />
-    <div
-      id="app"
-      class="flex justify-center"
-    >
+  <v-app class="app-shell">
+    <Header class="app-header" />
+    <main class="app-content">
       <router-view />
-    </div>
+    </main>
   </v-app>
 </template>
 
@@ -25,31 +19,24 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+.app-shell {
+  font-family: 'Inter', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  background-color: #edf2f7;
-  min-height: 450px;
+  color: #0f172a;
+  background: linear-gradient(180deg, #f4f7ff 0%, #ffffff 100%);
+  min-height: 100vh;
 }
-.full-width {
-  max-width: 100% !important;
-  padding: 0;
-  width: 100%;
-}
+
 .app-header {
-  background-color: initial;
   height: 80px;
+  background: transparent;
 }
-.title {
-  margin: 10px 0;
-}
-.name {
-  font-size: 3rem;
-  min-height: fit-content;
-  height: 80px;
-  line-height: 80px;
+
+.app-content {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  padding: 0;
 }
 </style>
