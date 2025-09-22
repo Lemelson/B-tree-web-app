@@ -1,35 +1,24 @@
 <template>
-  <div class="flex button-container align-center">
+  <div class="button-container align-center flex">
     <v-text-field
+      v-model="searchedValue"
       class="text-field"
-      placeholder="Поиск числа"
-      :value="SearchedValue"
-      @input="SearchedValue = $event"
-      @keyup.enter="SearchValue"
-    >
-      <v-tooltip
-        slot="append"
-        max-width="300"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-icon
-            class="h-8"
-            color="primary"
-            dark
-            v-on="on"
-          >
-            mdi-help-circle
-          </v-icon>
-        </template>
-      </v-tooltip>
-    </v-text-field>
+      :label="label"
+      :hint="hint"
+      :persistent-hint="Boolean(hint)"
+      :disabled="disabled"
+      outlined
+      dense
+      clearable
+      hide-details="auto"
+      prepend-inner-icon="mdi-magnify"
+      @keyup.enter="searchValue"
+    />
     <v-btn
-      class="button"
+      class="button ml-3"
       color="primary"
       :disabled="disabled"
-      dark
-      @click="SearchValue"
+      @click="searchValue"
     >
       Поиск
     </v-btn>
@@ -40,34 +29,37 @@
 export default {
   name: 'SearchInput',
   props: {
-    disabled: { type: Boolean },
+    disabled: { type: Boolean, default: false },
+    label: { type: String, default: 'Поиск значения' },
+    hint: { type: String, default: '' },
   },
   data() {
     return {
-      SearchedValue: '',
+      searchedValue: '',
     };
   },
   methods: {
-    SearchValue() {
-      if (this.SearchedValue !== '' && !this.disabled) {
-        console.log(this.SearchedValue);
-        this.$emit('myEvent', this.SearchedValue);
-        this.SearchedValue = '';
+    searchValue() {
+      if (this.searchedValue !== '' && !this.disabled) {
+        this.$emit('myEvent', this.searchedValue);
+        this.searchedValue = '';
       }
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .button-container {
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
 }
-.text-field{
-  margin-right: 1rem;
+
+.text-field {
+  flex: 1 1 auto;
 }
+
 .button {
-  min-width: fit-content !important;
+  min-width: 120px;
 }
 </style>
